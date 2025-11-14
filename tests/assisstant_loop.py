@@ -11,7 +11,7 @@ import google.generativeai as genai
 # CONFIG
 # ----------------------------
 
-GEMINI_API_KEY = 'AIzaSyDW82Z1O4kXzcMmfcGy210zrDCf0U5oUB8'
+GEMINI_API_KEY = 'AIzaSyC3vdtHHX3ltPFtE3cN_bbqFfLoP0QX2nk'
 genai.configure(api_key=GEMINI_API_KEY)
 
 RATE = 16000
