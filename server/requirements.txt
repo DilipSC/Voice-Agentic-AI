@@ -1,0 +1,8 @@
+fastapi
+uvicorn[standard]
+sqlalchemy
+psycopg2-binary
+google-generativeai
+sentence-transformers
+python-dotenv
+sounddevice==0.4.6 
