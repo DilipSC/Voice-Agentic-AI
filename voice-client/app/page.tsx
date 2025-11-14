@@ -63,60 +63,71 @@ export default function Home() {
 
   // Initialize speech recognition
   const initRecognition = () => {
-    const SpeechRecognition =
-      (window as any).SpeechRecognition ||
-      (window as any).webkitSpeechRecognition;
+  const SpeechRecognition =
+    (window as any).SpeechRecognition ||
+    (window as any).webkitSpeechRecognition;
 
     if (!SpeechRecognition) {
-      setError("Browser STT not supported. Use latest Chrome / Edge.");
+      setError("Browser STT not supported. Use latest Chrome.");
       return null;
     }
 
     const recognition = new SpeechRecognition();
+
     recognition.lang = "en-US";
-    recognition.interimResults = false;
+    recognition.continuous = true;     // 🔥 keeps listening
+    recognition.interimResults = true; // 🔥 prevents auto-stop
     recognition.maxAlternatives = 1;
 
     recognition.onstart = () => {
+      console.log("STT STARTED");
       setIsListening(true);
-      setError(null);
-    };
-
-    recognition.onerror = (event: any) => {
-      console.error("STT error:", event.error);
-      setError(`STT error: ${event.error}`);
-      setIsListening(false);
-    };
-
-    recognition.onend = () => {
-      setIsListening(false);
     };
 
     recognition.onresult = (event: SpeechRecognitionEvent) => {
-      const transcript = event.results[0][0].transcript.trim();
-      console.log("Heard:", transcript);
-      if (transcript) {
-        handleUserText(transcript);
+      const result = event.results[event.resultIndex][0].transcript;
+      console.log("Heard:", result);
+      setInput(result); // live preview
+    };
+
+    recognition.onerror = (event: any) => {
+      console.error("STT Error:", event.error);
+
+      if (event.error === "no-speech" || event.error === "audio-capture") {
+       console.log("Retrying automatically...");
+       recognition.start(); // 🔥 recover automatically
       }
+    };
+
+  // 🔥 MOST IMPORTANT FIX
+  // If browser stops recognition randomly, restart it
+    recognition.onend = () => {
+      if (isListening) {
+        console.log("STT ended unexpectedly — restarting…");
+        recognition.start();
+     }
     };
 
     return recognition;
   };
 
   const startListening = () => {
+    if (!recognitionRef.current) {
+      recognitionRef.current = initRecognition();
+    }
     try {
-      if (!recognitionRef.current) {
-        recognitionRef.current = initRecognition();
-      }
       recognitionRef.current?.start();
+      setIsListening(true);
     } catch (err) {
-      console.error(err);
-      setError("Could not start microphone. Check permissions.");
+      console.error("Start Error:", err);
     }
   };
 
+
   const stopListening = () => {
+    setIsListening(false);
     recognitionRef.current?.stop();
+    console.log("Listening stopped manually.");
   };
 
   const speakText = (text: string) => {
