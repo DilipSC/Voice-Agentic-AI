@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+python-dotenv
+sqlalchemy
+psycopg2-binary
+sentence-transformers
+google-generativeai
+langchain-core
+langchain-google-genai
+tavily-python
